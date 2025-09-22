@@ -57,7 +57,7 @@ export default {
       "idFormula",
       "generateColumns",
       "columns",
-      ["pagination", "paginationPageSize", "suppressServerSideFullWidthLoadingRow"],
+      ["pagination", "paginationPageSize", "showPaginationUI", "suppressServerSideFullWidthLoadingRow"],
       [
         "rowSelection",
         "enableClickSelection",
@@ -1099,6 +1099,20 @@ export default {
       bindingValidation: {
         type: "number",
         tooltip: "Number of rows to display per page",
+      },
+      hidden: (content) => !content.pagination,
+      /* wwEditor:end */
+    },
+    showPaginationUI: {
+      label: { en: "Show Pagination UI" },
+      type: "OnOff",
+      section: "settings",
+      bindable: true,
+      defaultValue: false,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "boolean",
+        tooltip: "When enabled, AG Grid's pagination panel is visible.",
       },
       hidden: (content) => !content.pagination,
       /* wwEditor:end */
