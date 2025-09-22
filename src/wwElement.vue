@@ -18,7 +18,7 @@
       :pagination="content.pagination"
       :paginationPageSize="content.paginationPageSize || 10"
       :paginationPageSizeSelector="false"
-      :suppressPaginationPanel="true"
+      :suppressPaginationPanel="!(content?.pagination && content?.showPaginationUI)"
       :suppressMovableColumns="!content.movableColumns"
       :suppressServerSideFullWidthLoadingRow="content?.suppressServerSideFullWidthLoadingRow ?? true"
       :columnHoverHighlight="content.columnHoverHighlight"
