@@ -384,6 +384,59 @@ export default {
               sortable: col.sortable,
               filter: col.filter,
             };
+          case "dateString": {
+            const parseToMidnight = (value) => {
+              if (value == null) return NaN;
+              const date = new Date(value);
+              if (isNaN(date.getTime())) return NaN;
+              const normalized = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                0,
+                0,
+                0,
+                0
+              );
+              return normalized.getTime();
+            };
+            const result = {
+              ...commonProperties,
+              headerName: col.headerName,
+              field: col.field,
+              sortable: col.sortable,
+              filter: col.filter ? "agDateColumnFilter" : false,
+              comparator: (a, b) => {
+                const ta = parseToMidnight(a);
+                const tb = parseToMidnight(b);
+                if (isNaN(ta) && isNaN(tb)) return 0;
+                if (isNaN(ta)) return 1;
+                if (isNaN(tb)) return -1;
+                return ta - tb;
+              },
+              filterParams: col.filter
+                ? {
+                    comparator: (filterLocalDateAtMidnight, cellValue) => {
+                      const cellTs = parseToMidnight(cellValue);
+                      if (isNaN(cellTs)) return -1;
+                      const filterTs = filterLocalDateAtMidnight?.getTime?.();
+                      if (typeof filterTs !== "number") return -1;
+                      if (cellTs === filterTs) return 0;
+                      return cellTs < filterTs ? -1 : 1;
+                    },
+                  }
+                : undefined,
+            };
+            if (col.useCustomLabel) {
+              result.valueFormatter = (params) => {
+                return this.resolveMappingFormula(
+                  col.displayLabelFormula,
+                  params.value
+                );
+              };
+            }
+            return result;
+          }
           case "image": {
             return {
               ...commonProperties,
@@ -405,6 +458,32 @@ export default {
               filter: col.filter,
               editable: col.editable,
             };
+            // Locale-aware, accent-insensitive sorting for strings. Works even when Type is Auto.
+            if (col.sortable) {
+              const lang = this.content?.lang || "en";
+              const locale = lang === "custom" ? "en" : lang;
+              const collator = new Intl.Collator(locale, {
+                sensitivity: "base",
+                ignorePunctuation: true,
+                numeric: true,
+              });
+              result.comparator = (a, b) => {
+                // Null/undefined/empty handling: push to bottom
+                const aEmpty = a == null || a === "";
+                const bEmpty = b == null || b === "";
+                if (aEmpty && bEmpty) return 0;
+                if (aEmpty) return 1;
+                if (bEmpty) return -1;
+
+                // Numeric handling if both look numeric
+                const aNum = typeof a === "number" || (typeof a === "string" && a.trim() !== "" && !isNaN(a));
+                const bNum = typeof b === "number" || (typeof b === "string" && b.trim() !== "" && !isNaN(b));
+                if (aNum && bNum) return Number(a) - Number(b);
+
+                // Locale-aware string compare (accent-insensitive)
+                return collator.compare(String(a), String(b));
+              };
+            }
             if (col.useCustomLabel) {
               result.valueFormatter = (params) => {
                 return this.resolveMappingFormula(
