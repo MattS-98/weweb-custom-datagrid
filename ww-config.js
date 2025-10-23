@@ -138,6 +138,18 @@ export default {
       },
       getTestEvent: "getRowClickedTestEvent",
     },
+    {
+      name: "headerClicked",
+      label: { en: "On Header Clicked" },
+      event: {
+        column_id: '',
+        column_def: '',
+        column_provided_def: null,
+        context: null,
+        api: null,
+        type: '',
+      },
+    },
   ],
   actions: [
     {

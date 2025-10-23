@@ -33,6 +33,7 @@
       @filter-changed="onFilterChanged"
       @sort-changed="onSortChanged"
       @row-clicked="onRowClicked"
+      @column-header-clicked="onHeaderClicked"
       @pagination-changed="onPaginationChanged"
     >
     </ag-grid-vue>
@@ -361,6 +362,7 @@ export default {
             return {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               cellRenderer: "ActionCellRenderer",
               cellRendererParams: {
                 name: col.actionName,
@@ -376,6 +378,7 @@ export default {
             return {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               cellRenderer: "WewebCellRenderer",
               cellRendererParams: {
@@ -403,6 +406,7 @@ export default {
             const result = {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               sortable: col.sortable,
               filter: col.filter ? "agDateColumnFilter" : false,
@@ -441,6 +445,7 @@ export default {
             return {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               cellRenderer: "ImageCellRenderer",
               cellRendererParams: {
@@ -453,6 +458,7 @@ export default {
             const result = {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               sortable: col.sortable,
               filter: col.filter,
@@ -614,6 +620,19 @@ export default {
           id: event.node.id,
           index: event.node.sourceRowIndex,
           displayIndex: event.rowIndex,
+        },
+      });
+    },
+    onHeaderClicked(event) {
+      this.$emit("trigger-event", {
+        name: "headerClicked",
+        event: {
+          column_id: event.column.getColId(),
+          column_def: event.column.getColDef(),
+          column_provided_def: event.column.getUserProvidedColDef(),
+          context: event.context,
+          api: event.api,
+          type: event.type,
         },
       });
     },
