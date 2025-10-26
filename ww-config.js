@@ -150,6 +150,17 @@ export default {
         type: '',
       },
     },
+    {
+      name: "customButtonClicked",
+      label: { en: "On Custom Button Clicked" },
+      event: {
+        column_id: '',
+        column_def: {},
+        column_provided_def: {},
+        field: '',
+        displayName: '',
+      },
+    },
   ],
   actions: [
     {
@@ -1038,6 +1049,14 @@ export default {
                   array?.item?.cellDataType === "image",
                   bindable: true,
               },
+              customButton: {
+                label: "Custom Button",
+                type: "OnOff",
+                hidden:
+                  array?.item?.cellDataType === "action" ||
+                  array?.item?.cellDataType === "image",
+                  bindable: true,
+              },
               actionName: {
                 label: "Action Name",
                 type: "Text",
@@ -1070,6 +1089,7 @@ export default {
         defaultValue: {
           filter: false,
           sortable: false,
+          customButton: false
         },
         movable: true,
         expandable: true,

@@ -67,8 +67,6 @@ import CustomHeaderComponent from "./components/CustomHeaderComponent.vue";
 
 console.log("AG Grid version:", AG_GRID_LOCALE_FR);
 
-// TODO: maybe register less modules
-// TODO: maybe register modules per grid instead of globally
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default {
@@ -351,7 +349,9 @@ export default {
       };
     },
     columnDefs() {
+      if (!this.content.columns) return [];
       return this.content.columns.map((col) => {
+        if (!col) return null;
         const minWidth =
           !col.minWidth || col.minWidth === "auto"
             ? null
@@ -535,7 +535,7 @@ export default {
             return result;
           }
         }
-      });
+      }).filter(col => col !== null);
     },
     rowSelection() {
       if (this.content.rowSelection === "multiple") {
@@ -734,7 +734,7 @@ export default {
 
         // We assume there will only be one custom column each time
         const columnIndex = (this.content.columns || []).findIndex(
-          (col) => col.cellDataType === "custom" && !col.containerId
+          (col) => col && col.cellDataType === "custom" && !col.containerId
         );
         if (columnIndex === -1) return;
         const newColumns = [...this.content.columns];
