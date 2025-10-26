@@ -351,7 +351,9 @@ export default {
       };
     },
     columnDefs() {
+      if (!this.content.columns) return [];
       return this.content.columns.map((col) => {
+        if (!col) return null;
         const minWidth =
           !col.minWidth || col.minWidth === "auto"
             ? null
@@ -373,7 +375,7 @@ export default {
           flex,
           hide: !!col.hide,
         };
-        const headerProperties = col.customButton ? {
+        const headerProperties = {
           headerComponent: "CustomHeaderComponent",
           headerComponentParams: {
             customButtonTrigger: this.onCustomButtonClicked,
@@ -383,7 +385,7 @@ export default {
             filter: col.filter,
             customButton: col.customButton,
           },
-        } : {};
+        };
         switch (col.cellDataType) {
           case "action": {
             return {
@@ -535,7 +537,7 @@ export default {
             return result;
           }
         }
-      });
+      }).filter(col => col !== null);
     },
     rowSelection() {
       if (this.content.rowSelection === "multiple") {
@@ -678,7 +680,7 @@ export default {
               field: key,
               sortable: true,
               filter: true,
-              customButton: true,
+              customButton: false,
             }))
           : [],
       });
@@ -734,7 +736,7 @@ export default {
 
         // We assume there will only be one custom column each time
         const columnIndex = (this.content.columns || []).findIndex(
-          (col) => col.cellDataType === "custom" && !col.containerId
+          (col) => col && col.cellDataType === "custom" && !col.containerId
         );
         if (columnIndex === -1) return;
         const newColumns = [...this.content.columns];

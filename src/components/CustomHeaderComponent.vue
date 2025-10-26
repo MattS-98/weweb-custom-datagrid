@@ -2,7 +2,8 @@
   <div class="ag-cell-label-container" role="presentation">
     <div ref="eLabel" class="ag-header-cell-label" role="presentation">
       <!-- Left group: Header title + Sort icon -->
-      <div class="header-left-group" @click="onSortRequested">
+      <div class="header-left-group"
+      v-on="(params.sortable) ? { click: onSortRequested } : {}">
         <span
           ref="eText"
           class="ag-header-cell-text"
@@ -35,12 +36,9 @@
         </span>
         <span
           v-if="params?.customButton"
-          @click.stop="onCustomButtonClick"
-          class="ag-header-icon ag-header-label-icon ag-custom-button-icon"
-          role="button"
-          tabindex="0"
-          @keypress.enter.space="onCustomButtonClick"
-          title="Custom action"
+          ref="eCustomButton"
+          @click="onCustomButtonClick"
+          class="ag-header-icon ag-header-label-icon ag-filter-icon"
         >
           <span class="ag-icon ag-icon-filter"></span>
         </span>
@@ -103,7 +101,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+/* Use non-scoped styles to avoid interfering with AG Grid's native hover effects */
+
 /* Header label with space-between for left and right groups */
 .ag-header-cell-label {
   display: flex !important;
