@@ -164,6 +164,20 @@ export default {
   ],
   actions: [
     {
+      action: "quickFilter",
+      label: { en: "Quick Filter" },
+      args: [
+        {
+          name: "value",
+          type: "string",
+        },
+        {
+          name: "includeHiddenColumns",
+          type: "boolean",
+        },
+      ],
+    },
+    {
       action: "goToPage",
       label: { en: "Go to page" },
       args: [

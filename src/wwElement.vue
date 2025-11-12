@@ -264,6 +264,14 @@ export default {
         return doc?.body;
       }),
       // Actions
+      quickFilter: (value, includeHiddenColumns) => {
+        if (!gridApi.value) return;
+        const api = gridApi.value;
+        if (typeof includeHiddenColumns === 'boolean') {
+          api.setGridOption("includeHiddenColumnsInQuickFilter", includeHiddenColumns);
+        }
+        api.setGridOption("quickFilterText", value);
+      },
       goToPage: (page) => {
         if (!gridApi.value || !props.content.pagination) return;
         const api = gridApi.value;
