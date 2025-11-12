@@ -1337,6 +1337,7 @@ export default {
                   "editable",
                   "filter",
                   "sortable",
+                  "customButton",
                 ],
               },
             ],
