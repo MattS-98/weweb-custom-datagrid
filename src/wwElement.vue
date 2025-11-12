@@ -5,6 +5,17 @@
     :class="{ editing: isEditing, loading: !!content?.loading }"
     :style="cssVars"
   >
+    <div v-if="content.quickFilter" class="ww-quick-filter-container" :style="quickFilterContainerStyle">
+      <input
+        type="text"
+        id="filter-text-box"
+        class="ww-quick-filter-input"
+        :style="quickFilterInputStyle"
+        v-model="quickFilterText"
+        @input="onFilterTextBoxChanged"
+        :placeholder="content.quickFilterPlaceholder || 'Search...'"
+      />
+    </div>
     <ag-grid-vue
       :rowData="rowData"
       :columnDefs="columnDefs"
@@ -22,6 +33,7 @@
       :suppressMovableColumns="!content.movableColumns"
       :suppressServerSideFullWidthLoadingRow="content?.suppressServerSideFullWidthLoadingRow ?? true"
       :columnHoverHighlight="content.columnHoverHighlight"
+      :includeHiddenColumnsInQuickFilter="!!content.quickFilterAllDataInput"
       :locale-text="localeText"
       :popupParent="popupParent"
       enableCellTextSelection
@@ -99,6 +111,13 @@ export default {
     const gridApi = shallowRef(null);
     const containerRef = shallowRef(null);
     const headerHeight = shallowRef(0);
+    const { value: quickFilterText, setValue: setQuickFilterText } =
+      wwLib.wwVariable.useComponentVariable({
+        uid: props.uid,
+        name: "quickFilterText",
+        type: "string",
+        defaultValue: "",
+      });
     const { value: selectedRows, setValue: setSelectedRows } =
       wwLib.wwVariable.useComponentVariable({
         uid: props.uid,
@@ -255,6 +274,7 @@ export default {
       onSortChanged,
       onCustomButtonClicked,
       onPaginationChanged,
+      quickFilterText,
       containerRef,
       loaderStyle: computed(() => ({
         "--ww-loader-top": `${headerHeight.value}px`,
@@ -314,6 +334,16 @@ export default {
         if (typeof api.paginationSetPageSize === "function") {
           api.paginationSetPageSize(size);
         }
+      },
+
+      onFilterTextBoxChanged:(event) => {
+          const filterText = event.target.value;
+          const api = gridApi.value;
+          api.setGridOption(
+            "quickFilterText",
+            filterText
+          );
+          setQuickFilterText(filterText);
       },
       localeText: computed(() => {
         switch (props.content.lang) {
@@ -626,6 +656,36 @@ export default {
       // eslint-disable-next-line no-unreachable
       return false;
     },
+    quickFilterContainerStyle() {
+      const style = {};
+      if (this.content.quickFilterWidth) {
+        style.width = this.content.quickFilterWidth;
+      }
+      if (this.content.quickFilterWrapperBorderRadius) {
+        style.borderTopLeftRadius = this.content.quickFilterWrapperBorderRadius;
+        style.borderTopRightRadius = this.content.quickFilterWrapperBorderRadius;
+      }
+      if (this.content.quickFilterBackgroundColor) {
+        style.background = this.content.quickFilterBackgroundColor;
+      }
+      return style;
+    },
+    quickFilterInputStyle() {
+      const style = {};
+      if (this.content.quickFilterTextColor) {
+        style.color = this.content.quickFilterTextColor;
+      }
+      if (this.content.quickFilterBorderColor) {
+        style.borderColor = this.content.quickFilterBorderColor;
+      }
+      if (this.content.quickFilterWrapperBorderRadius) {
+        style.borderRadius = this.content.quickFilterWrapperBorderRadius;
+      }
+      if (this.content.quickFilterInputBackgroundColor) {
+        style.backgroundColor = this.content.quickFilterInputBackgroundColor;
+      }
+      return style;
+    },
   },
   methods: {
     getRowId(params) {
@@ -779,6 +839,44 @@ export default {
     }
   }
   /* wwEditor:end */
+}
+
+.ww-quick-filter-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  box-sizing: border-box;
+}
+
+.ww-quick-filter-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  &::placeholder {
+    color: #6c757d;
+    opacity: 1;
+  }
 }
 
 .ww-loader-overlay {

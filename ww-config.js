@@ -6,6 +6,7 @@ export default {
     icon: "table",
     customStylePropertiesOrder: [
       ["layout", "height", "textColor", "borderColor", "wrapperBorderRadius"],
+      ["quickFilterTitle","quickFilter", "quickFilterWidth", "quickFilterAllDataInput", "quickFilterPlaceholder", "quickFilterTextColor", "quickFilterBorderColor", "quickFilterWrapperBorderRadius", "quickFilterInputBackgroundColor", "quickFilterBackgroundColor"],
       [
         "headerTitle",
         "headerBackgroundColor",
@@ -90,6 +91,13 @@ export default {
         row: null,
       },
       getTestEvent: "getOnCellValueChangedTestEvent",
+    },
+    {
+      name: "quickFilterTextChanged",
+      label: { en: "On Quick Filter Text Changed" },
+      event: {
+        value: null,
+      },
     },
     {
       name: "rowSelected",
@@ -193,6 +201,11 @@ export default {
     },
   ],
   properties: {
+    quickFilterTitle: {
+      type: "Title",
+      label: "Quick Filter",
+      editorOnly: true,
+    },
     headerTitle: {
       type: "Title",
       label: "Header",
@@ -227,6 +240,118 @@ export default {
       type: "Title",
       label: "Selection",
       editorOnly: true,
+    },
+    quickFilter: {
+      type: "OnOff",
+      label: "Search Filter",
+      defaultValue: false,
+      responsive: true,
+      bindable: true,
+      states: true,
+      classes: true,
+    },
+    quickFilterWidth: {
+      type: "Length",
+      label: "Search Width",
+      options: {
+        unitChoices: [
+          { value: "px", label: "px", min: 1, max: 100, default: true },
+          { value: "em", label: "em", min: 0, max: 10, digits: 3, step: 0.1 },
+          { value: "rem", label: "rem", min: 0, max: 10, digits: 3, step: 0.1 },
+        ],
+      },
+      hidden: (content) => content.quickFilter === false,
+    },
+    quickFilterAllDataInput: {
+      type: "OnOff",
+      label: "All Data Input Filtered",
+      responsive: true,
+      bindable: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
+    },
+    quickFilterTextColor: {
+      label: "Text Color",
+      type: "Color",
+      category: "text",
+      options: { nullable: true },
+      bindable: true,
+      bindingValidation: {
+        markdown: "color",
+        type: "string",
+        cssSupports: "color",
+      },
+      responsive: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
+    },
+    quickFilterPlaceholder: {
+      label: "Placeholder Text",
+      type: "Text",
+      options: { placeholder: "Search..." },
+      bindable: true,
+      responsive: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
+    },
+    quickFilterInputBackgroundColor: {
+      label: "Input Background Color",
+      type: "Color",
+      options: { nullable: true },
+      bindable: true,
+      bindingValidation: {
+        markdown: "color",
+        type: "string",
+        cssSupports: "color",
+      },
+      responsive: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
+    },
+    quickFilterBackgroundColor: {
+      label: "Background Color",
+      type: "Color",
+      options: { nullable: true },
+      bindable: true,
+      bindingValidation: {
+        markdown: "color",
+        type: "string",
+        cssSupports: "color",
+      },
+
+      responsive: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
+    },
+
+    quickFilterBorderColor: {
+      type: "Color",
+      label: "Border Color",
+      options: {
+        nullable: true,
+      },
+      responsive: true,
+      bindable: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
+    },
+    quickFilterWrapperBorderRadius: {
+      label: { en: "Border Radius" },
+      type: "Length",
+      options: {
+        noRange: true
+      },
+      bindable: true,
+      responsive: true,
+      states: true,
+      classes: true,
+      hidden: (content) => content.quickFilter === false,
     },
     layout: {
       type: "TextSelect",
