@@ -33,6 +33,7 @@
       @filter-changed="onFilterChanged"
       @sort-changed="onSortChanged"
       @row-clicked="onRowClicked"
+      @column-header-clicked="onHeaderClicked"
       @pagination-changed="onPaginationChanged"
     >
     </ag-grid-vue>
@@ -62,6 +63,7 @@ import {
 import ActionCellRenderer from "./components/ActionCellRenderer.vue";
 import ImageCellRenderer from "./components/ImageCellRenderer.vue";
 import WewebCellRenderer from "./components/WewebCellRenderer.vue";
+import CustomHeaderComponent from "./components/CustomHeaderComponent.vue";
 
 console.log("AG Grid version:", AG_GRID_LOCALE_FR);
 
@@ -75,6 +77,7 @@ export default {
     ActionCellRenderer,
     ImageCellRenderer,
     WewebCellRenderer,
+    CustomHeaderComponent,
   },
   props: {
     content: {
@@ -193,6 +196,19 @@ export default {
       }
     };
 
+    const onCustomButtonClicked = (event) => {
+      ctx.emit("trigger-event", {
+        name: "customButtonClicked",
+        event: {
+          column_id: event.column_id,
+          column_def: event.column_def,
+          column_provided_def: event.column_provided_def,
+          field: event.field,
+          displayName: event.displayName,
+        },
+      });
+    };
+
     const onPaginationChanged = () => {
       if (!gridApi.value) return;
       const api = gridApi.value;
@@ -237,6 +253,7 @@ export default {
       gridApi,
       onFilterChanged,
       onSortChanged,
+      onCustomButtonClicked,
       onPaginationChanged,
       containerRef,
       loaderStyle: computed(() => ({
@@ -334,7 +351,9 @@ export default {
       };
     },
     columnDefs() {
+      if (!this.content.columns) return [];
       return this.content.columns.map((col) => {
+        if (!col) return null;
         const minWidth =
           !col.minWidth || col.minWidth === "auto"
             ? null
@@ -356,11 +375,23 @@ export default {
           flex,
           hide: !!col.hide,
         };
+        const headerProperties = {
+          headerComponent: "CustomHeaderComponent",
+          headerComponentParams: {
+            customButtonTrigger: this.onCustomButtonClicked,
+            headerName: col.headerName,
+            field: col.field,
+            sortable: col.sortable,
+            filter: col.filter,
+            customButton: col.customButton,
+          },
+        };
         switch (col.cellDataType) {
           case "action": {
             return {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               cellRenderer: "ActionCellRenderer",
               cellRendererParams: {
                 name: col.actionName,
@@ -370,12 +401,15 @@ export default {
               },
               sortable: false,
               filter: false,
+              customButton: false,
             };
           }
           case "custom":
             return {
               ...commonProperties,
+              ...headerProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               cellRenderer: "WewebCellRenderer",
               cellRendererParams: {
@@ -383,6 +417,7 @@ export default {
               },
               sortable: col.sortable,
               filter: col.filter,
+              customButton: col.customButton,
             };
           case "dateString": {
             const parseToMidnight = (value) => {
@@ -402,10 +437,13 @@ export default {
             };
             const result = {
               ...commonProperties,
+              ...headerProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               sortable: col.sortable,
               filter: col.filter ? "agDateColumnFilter" : false,
+              customButton: col.customButton,
               comparator: (a, b) => {
                 const ta = parseToMidnight(a);
                 const tb = parseToMidnight(b);
@@ -441,6 +479,7 @@ export default {
             return {
               ...commonProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               cellRenderer: "ImageCellRenderer",
               cellRendererParams: {
@@ -452,11 +491,14 @@ export default {
           default: {
             const result = {
               ...commonProperties,
+              ...headerProperties,
               headerName: col.headerName,
+              colId: 'datagrid-header-' + col.field,
               field: col.field,
               sortable: col.sortable,
               filter: col.filter,
               editable: col.editable,
+              customButton: col.customButton,
             };
             // Locale-aware, accent-insensitive sorting for strings. Works even when Type is Auto.
             if (col.sortable) {
@@ -495,7 +537,7 @@ export default {
             return result;
           }
         }
-      });
+      }).filter(col => col !== null);
     },
     rowSelection() {
       if (this.content.rowSelection === "multiple") {
@@ -617,6 +659,19 @@ export default {
         },
       });
     },
+    onHeaderClicked(event) {
+      this.$emit("trigger-event", {
+        name: "headerClicked",
+        event: {
+          column_id: event.column.getColId(),
+          column_def: event.column.getColDef(),
+          column_provided_def: event.column.getUserProvidedColDef(),
+          context: event.context,
+          api: event.api,
+          type: event.type,
+        },
+      });
+    },
     /* wwEditor:start */
     generateColumns() {
       this.$emit("update:content", {
@@ -625,6 +680,7 @@ export default {
               field: key,
               sortable: true,
               filter: true,
+              customButton: false,
             }))
           : [],
       });
@@ -680,7 +736,7 @@ export default {
 
         // We assume there will only be one custom column each time
         const columnIndex = (this.content.columns || []).findIndex(
-          (col) => col.cellDataType === "custom" && !col.containerId
+          (col) => col && col.cellDataType === "custom" && !col.containerId
         );
         if (columnIndex === -1) return;
         const newColumns = [...this.content.columns];
