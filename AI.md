@@ -30,6 +30,8 @@ A highly customizable data grid/table component that supports features like sort
 - `headerFontWeight`: `null | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900` - Font weight of header text.
 - `headerFontSize`: `string` - Font size of header text.
 - `headerFontFamily`: `string` - Font family for header text.
+- `headerHeightMode`: `undefined|auto` - Set to auto to have auto height on the header
+- `headerHeight`: `string` - If headerHeightMode is not auto, the header height (default to the 48px of the template)
 - `borderColor`: `string | null` - Color of grid borders.
 - `wrapperBorderRadius`: `string | null` - Border radius of the wrapper
 - `cellColor`: `string | null` - Text color of grid cells.
@@ -64,6 +66,7 @@ A highly customizable data grid/table component that supports features like sort
 - `paginationPageSize`: `number` - Number of rows per page. Default: `10`.
 - `initialFilters`: `{id: { filterType, type, filter } }` (Optional): An aggrid object describing the initial filtering. Here is an example: `{ id1: { filterType: "number", type: "greaterThan", filter: 50}}`
 - `initialSort`: `Array<{colId: id, sort: 'asc' |'dsc'}>` (Optional): Description of the initial sort column. Here is an example: `[{colId: "ID", sort: "asc"}]`
+- `initialColumnsOrder`: `Array<ColId>` (Optional): List of the column order, if different from columns definition ones
 - `lang`: `'en' | 'fr' | 'de' | 'pt' | 'custom'` - Locale use for the interface. Default: `"en"`. If `custom` the property localeText should be provided
 - `localeText`: only needed when lang is set to custom. Must be an object provided to aggrid 
 - `columns`: `Array<{
@@ -112,6 +115,13 @@ A highly customizable data grid/table component that supports features like sort
     pinned: undefined | 'left' | 'right'
   }>` - Column configurations. Each object describe a column of the grid, and some options may depends on the selected type of data. For each object, width can be undefined, if defined its must be a string in the shape of {value}px. Flex will be ignore if width is defined or equal to auto and must be an integer.`
 
+***Exposed Variables:***
+- selectedRows: ***READ ONLY*** Array of currently selected rows.
+- filters: ***READ ONLY*** Current filter state as an object containing active filters.
+- sort: ***READ ONLY*** Current sort state as an array of sort configurations.
+- columnsOrder: ***READ ONLY*** Current columns order state as an array of column id.
+
+
 
 ***Events:***
 - action: Triggered when clicking on a action cell. Payload: { actionName: 'name of the column', row: { /* row data */}, id: 0, index: 0, displayIndex: 0 }
@@ -119,6 +129,11 @@ A highly customizable data grid/table component that supports features like sort
 - rowSelected: triggered when a row is selected. Payload: { row: { /* row data */} }
 - rowDeselected: triggered when a row is deselected. Payload: { row: { /* row data */} }
 - rowClicked: Triggered when clicking on a row. Payload: { row: { /* row data */}, id: 0, index: 0, displayIndex: 0 }
+- rowDragStart: Triggered when row drag is initiated. Payload: { row: { /* row data */}, id: 0 }
+- rowDragged: Triggered when row drag is ended. Payload: { row: { /* row data */}, id: 0, targetIndex: 0, rows: Array[RowData] }
+- columnMoved: Triggered when a column has been moved. Payload: { toIndex: 0, columnId: 'id', columnsOrder: Array[id] }
+- filterChanged: Triggered when filters are applied or changed. Payload: filter model object
+- sortChanged: Triggered when sorting is applied or changed. Payload: array of sort configurations
 
 ***Notes:***
 - idFormula always use javascript with context.mapping value "context.mapping..."
