@@ -119,6 +119,20 @@ export default {
   gap: 4px;
   flex: 1;
   min-width: 0;
+  justify-content: flex-start;
+}
+
+/* Alignment classes applied to parent .ag-header-cell */
+.ag-header-cell.-center .header-left-group {
+  justify-content: center;
+}
+
+.ag-header-cell.-right .header-left-group {
+  justify-content: flex-end;
+}
+
+.ag-header-cell.-left .header-left-group {
+  justify-content: flex-start;
 }
 
 /* Right group: Filter icon + Custom button - only takes needed space */
