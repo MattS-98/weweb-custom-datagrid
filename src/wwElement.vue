@@ -17,13 +17,7 @@
       :theme="theme"
       :getRowId="getRowId"
       :pagination="content.pagination"
-      :paginationPageSize="
-        forcedPaginationPageSize
-          ? 0
-          : paginationPageSizeSelector
-          ? paginationPageSizeSelector[0]
-          : content.paginationPageSize
-      "
+      :paginationPageSize="computedPaginationPageSize"
       :paginationPageSizeSelector="paginationPageSizeSelector"
       :suppressPaginationPanel="!(content?.pagination && content?.showPaginationUI)"
       :suppressMovableColumns="!content.movableColumns"
@@ -353,19 +347,28 @@ export default {
     const { createElement } = wwLib.useCreateElement();
     /* wwEditor:end */
 
-    // Hack to force pagination page size update when changing pagination selector mode
-    const forcedPaginationPageSize = ref(false);
-    watch(
-      () => props.content.hasPaginationSelector,
-      (newVal, oldVal) => {
-        if (oldVal === "multiple" && newVal !== "multiple") {
-          forcedPaginationPageSize.value = true;
-          nextTick().then(() => {
-            forcedPaginationPageSize.value = false;
-          });
-        }
+    const paginationPageSizeSelector = computed(() => {
+      if (
+        !props.content.pagination ||
+        props.content.hasPaginationSelector !== "multiple"
+      ) {
+        return false;
       }
-    );
+      if (
+        !Array.isArray(props.content.paginationPageSizeSelector) ||
+        props.content.paginationPageSizeSelector.length === 0
+      ) {
+        return false;
+      }
+      return props.content.paginationPageSizeSelector;
+    });
+
+    const computedPaginationPageSize = computed(() => {
+      if (paginationPageSizeSelector.value) {
+        return paginationPageSizeSelector.value[0];
+      }
+      return props.content.paginationPageSize || 10;
+    });
 
     const rowData = computed(() => {
       const data = wwLib.wwUtils.getDataFromCollection(props.content.rowData);
@@ -467,7 +470,8 @@ export default {
             AG_GRID_LOCALE_EN;
         }
       }),
-      forcedPaginationPageSize,
+      computedPaginationPageSize,
+      paginationPageSizeSelector,
       onRowDragged,
       onRowDragEnter,
       onColumnMoved,
@@ -781,21 +785,6 @@ export default {
       // eslint-disable-next-line no-unreachable
       return false;
     },
-    paginationPageSizeSelector() {
-      if (
-        !this.content.pagination ||
-        this.content.hasPaginationSelector !== "multiple"
-      ) {
-        return false;
-      }
-      if (
-        !Array.isArray(this.content.paginationPageSizeSelector) ||
-        this.content.paginationPageSizeSelector.length === 0
-      ) {
-        return false;
-      }
-      return this.content.paginationPageSizeSelector;
-    },
   },
   methods: {
     getRowId(params) {
@@ -998,18 +987,18 @@ export default {
     height: 100%;
   }
   :deep(.ag-header-cell) {
-    &.-center .ag-header-cell-label {
+    &.-center .header-left-group {
       justify-content: center;
     }
     &.-right {
-      .ag-header-cell-label {
+      .header-left-group {
         justify-content: flex-end;
       }
       .ag-header-cell-filter-button {
         margin-left: 4px;
       }
     }
-    &.-left .ag-header-cell-label {
+    &.-left .header-left-group {
       justify-content: flex-start;
     }
   }
